@@ -63,11 +63,11 @@ function fruitYes() {
 
 function makePurchase(answer, item){
     connection.query(
-        "SELECT *  FROM products WHERE product_name ='" + answer.product + "'",
+        "SELECT *  FROM products WHERE id ='" + answer.product + "'",
         function(err, res){
             if (err) throw err;
             console.log(res);
-            if (answer.product > res[0].stock_quantity){
+            if (answer.quantity > res[0].stock_quantity){
              console.log("Insufficient quantity!"); 
              return
             }
@@ -76,16 +76,16 @@ function makePurchase(answer, item){
             var newAmount = res[0].stock_quantity - answer.quantity;
             console.log(cost);
             console.log("That will be $ " + cost);
+            var item = answer.product;
+            // var item = answer.product;  
             console.log(newAmount);
-            var item = answer.id;
-            console.log(item);   
-            // var item = answer.product;
-            restock();
+            console.log(item); 
+            restock(newAmount, item);
             }
         },
     )
 }
-function restock(answer, newAmount, item){
+function restock(newAmount, item){
     connection.query(
         "UPDATE products SET ? WHERE ?",
         [{
@@ -99,7 +99,7 @@ function restock(answer, newAmount, item){
         if (err) throw err;
         console.log(res.affectedRows + "products restocked!")
         console.table(res);
-        fruitYes();
+        start();
         }
     )
 }

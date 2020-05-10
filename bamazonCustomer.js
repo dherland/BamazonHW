@@ -63,7 +63,7 @@ function fruitYes() {
 
 function makePurchase(answer, item){
     connection.query(
-        "SELECT product_name, price, stock_quantity FROM products WHERE product_name ='" + answer.product + "'",
+        "SELECT *  FROM products WHERE product_name ='" + answer.product + "'",
         function(err, res){
             if (err) throw err;
             console.log(res);

@@ -5,7 +5,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: "3306",
     user: "root",
-    password: "",
+    password: "root",
     database: "bamazonDB"
 });
 
@@ -42,17 +42,18 @@ function fruitYes() {
             inquirer
             .prompt([
                 {
-                    name: "item",
+                    name: "product",
                     type: "input",
-                    message: "What is the name of the item you would like to buy?"
+                    message: "What is the id of the item you would like to buy?"
                 },
                 {
-                    name: "category",
+                    name: "quantity",
                     type: "number",
                     message:"How many would you like?",
                 }
             ])
             .then(function(answer){
+                var quantity = answer.quantity;
                 makePurchase(answer);
             })
             
@@ -60,33 +61,45 @@ function fruitYes() {
     )
 }
 
-function makePurchase(answer){
+function makePurchase(answer, item){
     connection.query(
-        "SELECT product_name, price, stock_quantity FROM products WHERE product_name ='" + answer.item + "'",
+        "SELECT product_name, price, stock_quantity FROM products WHERE product_name ='" + answer.product + "'",
         function(err, res){
             if (err) throw err;
             console.log(res);
-
-            if (answer.category > res[0].stock_quantity){
+            if (answer.product > res[0].stock_quantity){
              console.log("Insufficient quantity!"); 
              return
             }
-            var cost = answer.category * res[0].price;
+            else {
+            var cost = answer.quantity * res[0].price;
+            var newAmount = res[0].stock_quantity - answer.quantity;
             console.log(cost);
-        }  
-        .then(function(updateTable){
-            restock(updateTable);
-        })
-        
+            console.log("That will be $ " + cost);
+            console.log(newAmount);
+            var item = answer.id;
+            console.log(item);   
+            // var item = answer.product;
+            restock();
+            }
+        },
     )
 }
-
-function restock(updateTable){
+function restock(answer, newAmount, item){
     connection.query(
-        "UPDATE products",
+        "UPDATE products SET ? WHERE ?",
+        [{
+            stock_quantity: newAmount
+        },
+        {
+            id: item 
+        }
+    ],
         function(err, res){
         if (err) throw err;
-        console.log(res);
+        console.log(res.affectedRows + "products restocked!")
+        console.table(res);
+        fruitYes();
         }
     )
 }
